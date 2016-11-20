@@ -43,6 +43,7 @@ class Strategy {
         if ( candleStick.getBodySize() >= this.movementSize )
         {
             var price = 0;
+            var movementSize = 0.3; // how far the market needs to move before selling/buying the most recent trade
 
             // hollow candlestick means the market is closing better than it opened
             if ( candleStick.isHollow() )
@@ -53,9 +54,7 @@ class Strategy {
                 {
                     if(error == null)
                     {
-                        var movementSize = 0.3;
-
-                        this.smartOrders.push(new SmartOrder(order.price, order.size, order.side, movementSize))
+                        this.createSmartOrder(order.price, order.size, order.side, movementSize)
                     }
 
                 })
@@ -68,13 +67,16 @@ class Strategy {
                 {
                     if(error == null)
                     {
-                        var movementSize = 0.3;
-
-                        this.smartOrders.push(new SmartOrder(order.price, order.size, order.side, movementSize))
+                        this.createSmartOrder(order.price, order.size, order.side, movementSize)
                     }
                 })
             }
         }
+    }
+
+    createSmartOrder(price, size, side, movementSize)
+    {
+        this.smartOrders.push(new SmartOrder(price, size, side, movementSize))
     }
 
     onOrderComplete( order )

@@ -38,11 +38,11 @@ class Trade {
         //TODO better error check
         if ( !order.id )
         {
-            console.log( "ERROR, order failed: " + JSON.stringify(order));
+            console.log( "ERROR, order failed: " + JSON.stringify( order ) );
             return;
         }
 
-        this.trackedOrders[order.id] = onOrderCompleteCallback;
+        this.trackedOrders[ order.id ] = onOrderCompleteCallback;
 
         console.log( '*** Order placed of type: ' + order.side + " for " + order.size + " coins at $" + order.price );
 
@@ -51,21 +51,22 @@ class Trade {
             price: order.price,
             size: order.size,
             side: order.side,
-            id: order.id };
+            id: order.id
+        };
 
         setTimeout( this.cancelOrder.bind( this, order.id ), this.letOrderLiveDuration );
     }
 
     onOrderComplete( order )
     {
-        var activeOrder = this.openOrders[ order["order_id"] ];
+        var activeOrder = this.openOrders[ order[ "order_id" ] ];
 
         if ( activeOrder )
         {
-            console.log( "*** " + activeOrder.side + " order complete for " + activeOrder.size + " coins at $" + activeOrder.price);
+            console.log( "*** " + activeOrder.side + " order complete for " + activeOrder.size + " coins at $" + activeOrder.price );
 
-            this.trackedOrders[order.id](null, activeOrder);
-            delete this.trackedOrders[order.id];
+            this.trackedOrders[ order.id ]( null, activeOrder );
+            delete this.trackedOrders[ order.id ];
 
             if ( activeOrder.side === "sell" )
             {
@@ -84,16 +85,16 @@ class Trade {
 
     cancelOrder( id )
     {
-        var order = this.openOrders[id];
+        var order = this.openOrders[ id ];
 
-        if(order)
+        if ( order )
         {
-            console.log( "*** canceling " + order.side + " order for " + order.size + " at " + order.price);
+            console.log( "*** canceling " + order.side + " order for " + order.size + " at " + order.price );
 
-            gdaxApi.cancel( id, ( id ) => console.log( "order canceled: " + id ) )
+            gdaxApi.cancel( id, ( id ) => console.log( "order canceled: " + JSON.stringify( id ) ) )
 
-            this.trackedOrders[id]("cancelled");
-            delete this.trackedOrders[id];
+            this.trackedOrders[ id ]( "cancelled" );
+            delete this.trackedOrders[ id ];
 
             delete this.openOrders[ id ];
         }
@@ -105,22 +106,32 @@ class Balance {
     {
         // TODO get the btcValue from the gdaxapi
 
-        gdaxApi.listAccounts((accounts => {
-            accounts.forEach(account => {
-                if(account.currency == "BTC")
-                    this.coins = account.balance;
+        gdaxApi.listAccounts( (accounts =>
+        {
+            accounts.forEach( account =>
+            {
+                if ( account.currency == "BTC" )
+                {
+                    this.coins = parseFloat(account.balance);
+                }
 
-                if(account.currency == "USD")
-                    this.cash = account.balance;
-            });
-        }));
+                if ( account.currency == "USD" )
+                {
+                    this.cash = parseFloat(account.balance);
+                }
+            } );
 
-        gdaxApi.getTrades((trades => {
-            this.btcValue = trades[0].price
-        }));
+            this.initialValue = this.getBalance();
+        }) );
+
+        gdaxApi.getTrades( (trades =>
+        {
+            this.btcValue = trades[ 0 ].price
+        }) );
+
+        setTimeout(this.log.bind(this), 3000);
 
 
-        this.initialValue = this.getBalance();
     }
 
     purchase( price, size )
@@ -149,7 +160,7 @@ class Balance {
         console.log( '---------------------' )
         console.log( "USD: " + this.cash );
         console.log( "BTC: " + this.coins );
-        console.log( "GAIN: $" + this.getBalance() - this.initialValue )
+        console.log( "GAIN: $" + (this.getBalance() - this.initialValue) )
         console.log( '---------------------' )
     }
 }

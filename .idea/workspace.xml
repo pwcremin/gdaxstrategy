@@ -26,8 +26,8 @@
       <file leaf-file-name="bot.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/bot.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
+            <state relative-caret-position="-774">
+              <caret line="73" column="9" selection-start-line="73" selection-start-column="9" selection-end-line="73" selection-end-column="9" />
               <folding>
                 <element signature="e#0#48#0" expanded="false" />
               </folding>
@@ -47,11 +47,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="trade.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="trade.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/trade.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="147" column="5" selection-start-line="147" selection-start-column="5" selection-end-line="147" selection-end-column="5" />
+            <state relative-caret-position="-2790">
+              <caret line="7" column="52" selection-start-line="7" selection-start-column="52" selection-end-line="7" selection-end-column="52" />
               <folding>
                 <element signature="e#0#48#0" expanded="false" />
               </folding>
@@ -69,11 +69,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gdaxApi.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="gdaxApi.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gdaxApi.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="5" column="27" selection-start-line="5" selection-start-column="27" selection-end-line="5" selection-end-column="27" />
+            <state relative-caret-position="118">
+              <caret line="188" column="4" selection-start-line="188" selection-start-column="4" selection-end-line="188" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -83,7 +83,7 @@
         <entry file="file://$PROJECT_DIR$/.env">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="34">
-              <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+              <caret line="2" column="95" selection-start-line="2" selection-start-column="95" selection-end-line="2" selection-end-column="95" />
               <folding />
             </state>
           </provider>
@@ -148,12 +148,12 @@
         <option value="$PROJECT_DIR$/candleStick.js" />
         <option value="$PROJECT_DIR$/TradeTracker.js" />
         <option value="$PROJECT_DIR$/candleAnalizer.js" />
-        <option value="$PROJECT_DIR$/bot.js" />
         <option value="$PROJECT_DIR$/orderBook.js" />
-        <option value="$PROJECT_DIR$/trade.js" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/.env" />
         <option value="$PROJECT_DIR$/gdaxApi.js" />
+        <option value="$PROJECT_DIR$/bot.js" />
+        <option value="$PROJECT_DIR$/.env" />
+        <option value="$PROJECT_DIR$/trade.js" />
       </list>
     </option>
   </component>
@@ -319,12 +319,12 @@
       <option name="presentableId" value="Default" />
       <updated>1479503647318</updated>
       <workItem from="1479503654060" duration="55616000" />
-      <workItem from="1479672692517" duration="1771000" />
+      <workItem from="1479672692517" duration="2689000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="57387000" />
+    <option name="totallyTimeSpent" value="58305000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="833" extended-state="6" />
@@ -390,7 +390,7 @@
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="130" />
+      <option name="time" value="136" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -584,41 +584,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/candleAnalizer.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-          <folding>
-            <element signature="n#!!doc;n#CandleAnalizer#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/orderBook.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="257">
           <caret line="106" column="11" selection-start-line="106" selection-start-column="11" selection-end-line="106" selection-end-column="11" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/bot.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#48#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/trade.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="147" column="5" selection-start-line="147" selection-start-column="5" selection-end-line="147" selection-end-column="5" />
-          <folding>
-            <element signature="e#0#48#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -633,16 +603,46 @@
     <entry file="file://$PROJECT_DIR$/.env">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+          <caret line="2" column="95" selection-start-line="2" selection-start-column="95" selection-end-line="2" selection-end-column="95" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/gdaxApi.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="27" selection-start-line="5" selection-start-column="27" selection-end-line="5" selection-end-column="27" />
+        <state relative-caret-position="118">
+          <caret line="188" column="4" selection-start-line="188" selection-start-column="4" selection-end-line="188" selection-end-column="4" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/bot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-774">
+          <caret line="73" column="9" selection-start-line="73" selection-start-column="9" selection-end-line="73" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#48#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/candleAnalizer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc;n#CandleAnalizer#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/trade.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2790">
+          <caret line="7" column="52" selection-start-line="7" selection-start-column="52" selection-end-line="7" selection-end-column="52" />
+          <folding>
+            <element signature="e#0#48#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
