@@ -5,11 +5,6 @@ var fetch = require( 'node-fetch' );
 var crypto = require( 'crypto' );
 require('dotenv').config();
 
-// var passphrase = "z5p4prjkdnzn792iv37ue4s4i";
-// var apikey = "c619b76d97e22a60e7dacc6826d9391a";
-// var secret = "YW2DSp9hAbIyHlS29q1c5y3uqaeZXMp7zIqYiKQ1rnjHvFCuDgxfasOpt7m/GvTDnXvrwJpv8FfePfCDQKaQWg==";
-
-
 class GdaxApi {
 
     constructor()
