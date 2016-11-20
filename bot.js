@@ -23,11 +23,14 @@ class Strategy {
 
         this.costDelta = 0.0;           // difference from closing value to make the purchase/sell
 
+        this.canExecute = true;         // only want to run once per trading cycle
+
         this.smartOrders = [];
     }
 
     run()
     {
+        orderBook.addOrderCompleteListener( () => this.executeStrategy( candlestickManager.getRollingCandleStick() ) );
         orderBook.addOrderCompleteListener( this.onOrderComplete.bind( this ) );
 
         candlestickManager.onCandlestick( this.onTradingPeriodEnd.bind( this ) );
@@ -35,13 +38,19 @@ class Strategy {
 
     onTradingPeriodEnd( candleStick )
     {
+        this.canExecute = true;
+
         this.executeStrategy(candleStick);
     }
 
-    executeStrategy( candleStick )
+    executeStrategy(candleStick)
     {
+        if(!this.canExecute) return;
+
         if ( candleStick.getBodySize() >= this.movementSize )
         {
+            this.canExecute = false;
+
             var price = 0;
             var movementSize = 0.3; // how far the market needs to move before selling/buying the most recent trade
 
@@ -82,7 +91,10 @@ class Strategy {
     onOrderComplete( order )
     {
         var rollingCandleStick = candlestickManager.getRollingCandleStick();
-        console.log( "rolling size: " + rollingCandleStick.size );
+
+        if(!rollingCandleStick) return;
+
+        console.log( "rolling size: " + rollingCandleStick.getBodySize() );
     }
 }
 

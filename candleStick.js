@@ -32,14 +32,22 @@ class CandleStickManager {
 
     getRollingCandleStick()
     {
+        if(this.trades.length === 0)
+        {
+            console.log('what')
+        }
+        // TODO need something better than this
+        // should be impossible for this to happen
+        //if(this.trades.length == 0) null;
+
         var open = _.first( this.trades ).price;
         var close = _.last( this.trades ).price;
 
         return {
             open: open,
             close: close,
-            size: Math.abs(open - close),
-            isHollow: close > open
+            getBodySize: () => Math.abs(open - close),
+            isHollow: () => close > open
         }
     }
 
@@ -57,7 +65,7 @@ class CandleStickManager {
             this.candleSticks = this.candleSticks.slice(1000); // TODO another made up number, but just chop off some sticks
         }
 
-        this.log();
+        //this.log();
     }
 
 

@@ -106,32 +106,30 @@ class Balance {
     {
         // TODO get the btcValue from the gdaxapi
 
-        gdaxApi.listAccounts( (accounts =>
+        var promiseA = gdaxApi.listAccounts( accounts =>
         {
             accounts.forEach( account =>
             {
                 if ( account.currency == "BTC" )
                 {
-                    this.coins = parseFloat(account.balance);
+                    this.coins = parseFloat( account.balance );
                 }
 
                 if ( account.currency == "USD" )
                 {
-                    this.cash = parseFloat(account.balance);
+                    this.cash = parseFloat( account.balance );
                 }
             } );
+        } );
 
-            this.initialValue = this.getBalance();
-        }) );
-
-        gdaxApi.getTrades( (trades =>
+        var promiseB = gdaxApi.getTrades( trades =>
         {
             this.btcValue = trades[ 0 ].price
-        }) );
+        } );
 
-        setTimeout(this.log.bind(this), 3000);
+        promiseA.then( promiseB ).then( () => this.initialValue = this.getBalance() );
 
-
+        setTimeout( this.log.bind( this ), 3000 );
     }
 
     purchase( price, size )

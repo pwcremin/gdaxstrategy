@@ -85,7 +85,7 @@ class GdaxApi {
             {
             };
 
-        fetch( url, {
+        return fetch( url, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json"
@@ -110,7 +110,7 @@ class GdaxApi {
 
         var method = "GET";
 
-        this.privateFetch( requestPath, method, null, cb );
+        return this.privateFetch( requestPath, method, null, cb );
     }
 
     orderBook( level, cb )
@@ -119,7 +119,7 @@ class GdaxApi {
 
         var method = "GET";
 
-        this.privateFetch( requestPath, method, null, cb );
+        return this.privateFetch( requestPath, method, null, cb );
     }
 
     listAccounts( cb )
@@ -128,7 +128,7 @@ class GdaxApi {
 
         var method = "GET";
 
-        this.privateFetch( requestPath, method, null, cb );
+        return this.privateFetch( requestPath, method, null, cb );
     }
 
     getAccount( accountType, cb )
@@ -191,7 +191,7 @@ class GdaxApi {
         var requestPath = "/orders/" + order_id;
         var method = "DELETE";
 
-        this.privateFetch( requestPath, method, null, cb );
+        return this.privateFetch( requestPath, method, null, cb );
     }
 
     privateFetch( requestPath, method, body, cb )
@@ -216,7 +216,7 @@ class GdaxApi {
             config.body = JSON.stringify(body);
         }
 
-        fetch( url, config )
+        return fetch( url, config )
             .then( res => res.json() )
             .then( json =>
             {
