@@ -3,16 +3,12 @@
 var WebSocket = require( 'ws' );
 var fetch = require( 'node-fetch' );
 var crypto = require( 'crypto' );
+require('dotenv').config();
 
-var passphrase = "z5p4prjkdnzn792iv37ue4s4i";
-var apikey = "c619b76d97e22a60e7dacc6826d9391a";
-var secret = "YW2DSp9hAbIyHlS29q1c5y3uqaeZXMp7zIqYiKQ1rnjHvFCuDgxfasOpt7m/GvTDnXvrwJpv8FfePfCDQKaQWg==";
+// var passphrase = "z5p4prjkdnzn792iv37ue4s4i";
+// var apikey = "c619b76d97e22a60e7dacc6826d9391a";
+// var secret = "YW2DSp9hAbIyHlS29q1c5y3uqaeZXMp7zIqYiKQ1rnjHvFCuDgxfasOpt7m/GvTDnXvrwJpv8FfePfCDQKaQWg==";
 
-// decode the base64 secret
-var key = Buffer( secret, 'base64' );
-
-// create a sha256 hmac with the secret
-var hmac = crypto.createHmac( 'sha256', key );
 
 class GdaxApi {
 
@@ -213,10 +209,10 @@ class GdaxApi {
             method: method,
             headers: {
                 "Content-Type": "application/json",
-                "CB-ACCESS-KEY": apikey,            // The api key as a string.
+                "CB-ACCESS-KEY": process.env.apikey,            // The api key as a string.
                 "CB-ACCESS-SIGN": cbAccessSign,     // The base64-encoded signature (see Signing a Message).
                 "CB-ACCESS-TIMESTAMP": timestamp,   //A timestamp for your request.
-                "CB-ACCESS-PASSPHRASE": passphrase, //The passphrase you specified when creating the API key.
+                "CB-ACCESS-PASSPHRASE": process.env.passphrase, //The passphrase you specified when creating the API key.
             }
         };
 
@@ -246,7 +242,7 @@ class GdaxApi {
         }
 
         // decode the base64 secret
-        var key = Buffer( secret, 'base64' );
+        var key = Buffer( process.env.secret, 'base64' );
 
         // create a sha256 hmac with the secret
         var hmac = crypto.createHmac( 'sha256', key );
