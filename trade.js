@@ -5,8 +5,11 @@
 
 var orderBook = require( './orderBook' );
 var gdaxApi = require( './gdaxApi' );
-var candlestickManager = require( './candleStick' );
 
+var balance = require('/balance');
+
+var emitter = require( './emitter' ).emitter;
+var events = require( './emitter' ).events;
 
 class Trade {
 
@@ -16,11 +19,9 @@ class Trade {
 
         this.letOrderLiveDuration = 1000 * 30;
 
-        this.balance = new Balance();
-
         this.trackedOrders = {};
 
-        orderBook.addOrderCompleteListener( this.onOrderComplete.bind( this ) );
+        emitter.on(events.ORDER_COMPLETE, this.onOrderComplete.bind( this ))
     }
 
     buy( price, size, onOrderCompleteCallback )
@@ -38,13 +39,13 @@ class Trade {
         //TODO better error check
         if ( !order.id )
         {
-            console.log( "ERROR, order failed: " + JSON.stringify( order ) );
+            console.log( "Trade: ERROR, order failed: " + JSON.stringify( order ) );
             return;
         }
 
         this.trackedOrders[ order.id ] = onOrderCompleteCallback;
 
-        console.log( '*** Order placed of type: ' + order.side + " for " + order.size + " coins at $" + order.price );
+        console.log( '*** Trade: Order placed of type: ' + order.side + " for " + order.size + " coins at $" + order.price );
 
 
         this.openOrders[ order.id ] = {
@@ -54,33 +55,65 @@ class Trade {
             id: order.id
         };
 
-        setTimeout( this.cancelOrder.bind( this, order.id ), this.letOrderLiveDuration );
+        //setTimeout( this.cancelOrder.bind( this, order.id ), this.letOrderLiveDuration );
     }
 
     onOrderComplete( order )
+    {
+        var didUpdate = this.updateActiveOrder(order);
+
+        if(didUpdate == false)
+        {
+            // TODO this logic should be in the strategy, not the trade
+            // if this wasnt my order then I want to cancel because the market is moving
+            // and my a buy/sell didnt happen
+
+            // not sure about this.. the next order could be matching mine?
+            // put in a delay
+            setTimeout(this.cancelOpenOrders.bind(this), 5000);
+            //this.cancelOpenOrders()
+        }
+    }
+
+    cancelOpenOrders()
+    {
+        for(var id in this.openOrders)
+        {
+            console.log('^^^ Trade: canceling open orders')
+            this.cancelOrder(id)
+        }
+    }
+
+    updateActiveOrder(order)
     {
         var activeOrder = this.openOrders[ order[ "order_id" ] ];
 
         if ( activeOrder )
         {
-            console.log( "*** " + activeOrder.side + " order complete for " + activeOrder.size + " coins at $" + activeOrder.price );
+            console.log( "*** Trade: " + activeOrder.side + " order complete for " + activeOrder.size + " coins at $" + activeOrder.price );
 
-            this.trackedOrders[ order.id ]( null, activeOrder );
-            delete this.trackedOrders[ order.id ];
+            if(this.trackedOrders[ order.id ])
+            {
+                this.trackedOrders[ order.id ]( null, activeOrder );
+                delete this.trackedOrders[ order.id ];
+            }
 
             if ( activeOrder.side === "sell" )
             {
-                this.balance.sell( activeOrder.price, activeOrder.size );
+                balance.sell( activeOrder.price, activeOrder.size );
             }
             else if ( order.side === "buy" )
             {
-                this.balance.purchase( activeOrder.price, activeOrder.size );
+                balance.purchase( activeOrder.price, activeOrder.size );
             }
 
             delete this.openOrders[ activeOrder.id ];
 
-            this.balance.log();
+            balance.log();
+
         }
+
+        return activeOrder != null;
     }
 
     cancelOrder( id )
@@ -89,7 +122,7 @@ class Trade {
 
         if ( order )
         {
-            console.log( "*** canceling " + order.side + " order for " + order.size + " at " + order.price );
+            console.log( "*** Trade: canceling " + order.side + " order for " + order.size + " at " + order.price );
 
             gdaxApi.cancel( id, ( id ) => console.log( "order canceled: " + JSON.stringify( id ) ) )
 
@@ -101,67 +134,7 @@ class Trade {
     }
 }
 
-class Balance {
-    constructor()  // USD, BTC
-    {
-        // TODO get the btcValue from the gdaxapi
 
-        var promiseA = gdaxApi.listAccounts( accounts =>
-        {
-            accounts.forEach( account =>
-            {
-                if ( account.currency == "BTC" )
-                {
-                    this.coins = parseFloat( account.balance );
-                }
-
-                if ( account.currency == "USD" )
-                {
-                    this.cash = parseFloat( account.balance );
-                }
-            } );
-        } );
-
-        var promiseB = gdaxApi.getTrades( trades =>
-        {
-            this.btcValue = trades[ 0 ].price
-        } );
-
-        promiseA.then( promiseB ).then( () => this.initialValue = this.getBalance() );
-
-        setTimeout( this.log.bind( this ), 3000 );
-    }
-
-    purchase( price, size )
-    {
-        this.cash -= price * size;
-        this.coins += size;
-
-        this.btcValue = price;
-    }
-
-    sell( price, size )
-    {
-        this.cash += price * size;
-        this.coins -= size;
-
-        this.btcValue = price;
-    }
-
-    getBalance()
-    {
-        return this.cash + (this.coins * this.btcValue);
-    }
-
-    log()
-    {
-        console.log( '---------------------' )
-        console.log( "USD: " + this.cash );
-        console.log( "BTC: " + this.coins );
-        console.log( "GAIN: $" + (this.getBalance() - this.initialValue) )
-        console.log( '---------------------' )
-    }
-}
 
 var trade = new Trade();
 

@@ -1,25 +1,37 @@
-/**
- * Created by patrickcremin on 11/18/16.
- */
+// This strategy involves profiting from a stock's daily volatility.
+// This is done by attempting to buy at the low of the day and sell
+// at the high of the day. Here the price target is simply at the next
+// sign of a reversal
 
-"use strict"
+
+
+"use strict";
+
 var _ = require( 'lodash' );
 
 var fetch = require( 'node-fetch' );
 
-var orderBook = require( './orderBook' );
+var orderBook = require( './../orderBook' );
 
-var candlestickManager = require( './candleStick' );
+var candlestickManager = require( './../candleStick' );
 
-var trade = require( './trade' );
+var dataLogger = require('../datalogger');
 
+var emitter = require( '../emitter' ).emitter;
+var events = require( '../emitter' ).events;
+
+// THOUGHTS
+// * Make the same strategy but at different granularities.  One even a day long could be good
+// * Need to analyze what the candlesticks are doing.  If in a hard core upward trend then wouldnt want to do buy
+//      but would want to sell when it topped off
 
 class Strategy {
     constructor()
     {
         this.movementSize = 0.5;        // how far has the price moved during this period
 
-        this.purchaseSize = 0.01;       // how big of a buy to make.  This can be variable based on confidence later
+        // TODO need to do some testing. It may be that different order sizes are more likely to go through
+        this.purchaseSize = 0.03;       // how big of a buy to make.  This can be variable based on confidence later
 
         this.costDelta = 0.0;           // difference from closing value to make the purchase/sell
 
@@ -30,22 +42,24 @@ class Strategy {
 
     run()
     {
-        orderBook.addOrderCompleteListener( () => this.executeStrategy( candlestickManager.getRollingCandleStick() ) );
-        orderBook.addOrderCompleteListener( this.onOrderComplete.bind( this ) );
+        emitter.on(events.ORDER_COMPLETE, () => this.executeStrategy( candlestickManager.getRollingCandleStick() ));
+        emitter.on(events.ORDER_COMPLETE, this.onOrderComplete.bind( this ) );
 
-        candlestickManager.onCandlestick( this.onTradingPeriodEnd.bind( this ) );
+        emitter.on(events.CANDLESTICK_COMPLETE, this.onTradingPeriodEnd.bind( this ) );
     }
 
     onTradingPeriodEnd( candleStick )
     {
         this.canExecute = true;
 
-        this.executeStrategy(candleStick);
+        this.executeStrategy( candleStick );
     }
 
-    executeStrategy(candleStick)
+    executeStrategy( candleStick )
     {
-        if(!this.canExecute) return;
+        return;
+
+        if ( !this.canExecute ) return;
 
         if ( candleStick.getBodySize() >= this.movementSize )
         {
@@ -59,42 +73,45 @@ class Strategy {
             {
                 price = candleStick.close + this.costDelta;
 
-                trade.sell( price, this.purchaseSize, (error, order) =>
+                trade.sell( price, this.purchaseSize, ( cancelled, order ) =>
                 {
-                    if(error == null)
+                    if ( !cancelled )
                     {
-                        this.createSmartOrder(order.price, order.size, order.side, movementSize)
+                        this.createSmartOrder( order.price, order.size, order.side, movementSize )
                     }
-
-                })
+                    else
+                    {
+                        this.canExecute = true;
+                    }
+                } )
             }
             else
             {
                 price = candleStick.close - this.costDelta;
 
-                trade.buy( price, this.purchaseSize, (error, order) =>
+                trade.buy( price, this.purchaseSize, ( cancelled, order ) =>
                 {
-                    if(error == null)
+                    if ( !cancelled )
                     {
-                        this.createSmartOrder(order.price, order.size, order.side, movementSize)
+                        this.createSmartOrder( order.price, order.size, order.side, movementSize )
                     }
-                })
+                    else
+                    {
+                        console.log('^^^ order cancelled so enabling purchase again')
+                        this.canExecute = true;
+                    }
+                } )
             }
         }
     }
 
-    createSmartOrder(price, size, side, movementSize)
+    createSmartOrder( price, size, side, movementSize )
     {
-        this.smartOrders.push(new SmartOrder(price, size, side, movementSize))
+        this.smartOrders.push( new SmartOrder( price, size, side, movementSize ) )
     }
 
     onOrderComplete( order )
     {
-        var rollingCandleStick = candlestickManager.getRollingCandleStick();
-
-        if(!rollingCandleStick) return;
-
-        console.log( "rolling size: " + rollingCandleStick.getBodySize() );
     }
 }
 
@@ -107,7 +124,7 @@ class SmartOrder {
     constructor( price, size, side, movementSize )
     {
         var type = side == "buy" ? "sell" : "buy";
-        console.log("--- new 'smart order' created to " + type + " " + size + " at " + price)
+        console.log( "--- new 'smart order' created to " + type + " " + size + " at " + price )
 
         this.price = price;
         this.size = size;
@@ -116,14 +133,14 @@ class SmartOrder {
 
         this.isComplete = false;
 
+        this.executeStrategyCallback = this.executeStrategy.bind( this )
 
-        // TODO will need to remove listener also or this is going to run out of memory
-        orderBook.addOrderCompleteListener( this.executeStrategy.bind( this ) );
+        emitter.on(events.ORDER_COMPLETE, this.executeStrategyCallback);
     }
 
     executeStrategy( order )
     {
-        if(this.isComplete) return;
+        if ( this.isComplete ) return;
 
         var lastPrice = parseFloat( order.price ); // TODO the order needs to be in the right form when it comes from the order book
 
@@ -138,8 +155,8 @@ class SmartOrder {
                 if ( this.side == "buy" )
                 {
                     // price is going up after I did a buy.  Sell!
-                    console.log("--- smart order is doing a sell")
-                    trade.sell(lastPrice, this.size);
+                    console.log( "--- smart order is doing a sell" )
+                    trade.sell( lastPrice, this.size );
 
                     // now, this doesnt mean that an actual sell occurred, but I tried.
                     this.isComplete = true;
@@ -165,13 +182,18 @@ class SmartOrder {
                     // TODO only dealing with the buy side for now
 
                     // price is going up after I did a buy.  Sell!
-                    console.log("--- smart order is doing a buy")
-                    trade.buy(lastPrice, this.size);
+                    console.log( "--- smart order is doing a buy" )
+                    trade.buy( lastPrice, this.size );
 
                     // now, this doesnt mean that an actual sell occurred, but I tried.
                     this.isComplete = true;
                 }
             }
+        }
+
+        if(this.isComplete)
+        {
+            emitter.removeListener(events.ORDER_COMPLETE, this.executeStrategyCallback);
         }
     }
 }

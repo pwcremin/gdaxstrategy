@@ -2,122 +2,51 @@
 
 var _ = require( 'lodash' );
 var gdaxApi = require( './gdaxApi' );
-
-var candleStickManager = require( './candleStick' );
+var emitter = require( './emitter' ).emitter;
+var events = require( './emitter' ).events;
 
 class OrderBook {
     constructor()
     {
-
+        // lv 3 book
         this.book = {
             sequence: "",
-            bids: {}
-            //[ price, size, order_id ],
-            ,
-            asks: {},
-            //[ price, size, order_id ],
-            filled: []
+            bids: [], //[ price, size, order_id ],
+            asks: [], //[ price, size, order_id ],
         };
-
-        this.orderCompleteListeners = [];
-
-        this.force = new Force();
 
         this.queue = [];
 
-        this.orderListener = order => this.queue.push( order );
-        gdaxApi.addListener( this.orderListener );
+        this.orderListener = this.addToQueue.bind( this )
 
-        this.createOrderBook()
+        emitter.on( events.WSS_MESSAGE, this.orderListener );
 
-        this.getTop();
-
-        //setInterval(this.getTop.bind(this),  1000 * 1);
+        this.createOrderBook();
     }
 
-    getTop()
+    addToQueue( order )
     {
-        var highestBid = 0;
-        Object.keys(this.book.bids).forEach( (key) => {
-            highestBid = this.book.bids[key].price > highestBid ? this.book.bids[key].price : highestBid;
-        });
-
-        var lowestAsk = null;
-        Object.keys(this.book.asks).forEach( (key) => {
-            if(!lowestAsk) lowestAsk = this.book.asks[key].price;
-
-            lowestAsk = this.book.asks[key].price < lowestAsk ? this.book.asks[key].price : lowestAsk;
-        });
-
-        var top = {
-            bid: highestBid,
-            ask: lowestAsk,
-            spread: lowestAsk - highestBid
-        };
-
-        //console.log(JSON.stringify(top));
-
-        return top;
-    }
-
-    addOrderCompleteListener( cb )
-    {
-        this.orderCompleteListeners.push(cb);
-    }
-
-    getOrder( orderId )
-    {
-        if ( this.book.bids[ orderId ] )
-        {
-            return this.book.bids[ orderId ]
-        }
-        else if ( this.book.asks[ orderId ] )
-        {
-            return this.book.asks[ orderId ]
-        }
-
-        console.log( "------ FUCK ORDER DOESNT EXIST - why is this happening?" )
+        this.queue.push( order )
     }
 
     createOrderBook()
     {
         gdaxApi.orderBook( "3", orderbook =>
         {
-            orderbook.bids.forEach( bid =>
-            {
-                this.book.bids[ bid[ 2 ] ] = {
-                    sequence: orderbook[ "sequence" ],
-                    price: parseFloat( bid[ 0 ] ),
-                    size: parseFloat( bid[ 1 ] )
-                }
-            } );
+            this.book = orderbook;
 
-            orderbook.asks.forEach( bid =>
-            {
-                this.book.asks[ bid[ 2 ] ] = {
-                    sequence: orderbook[ "sequence" ],
-                    price: parseFloat( bid[ 0 ] ),
-                    size: parseFloat( bid[ 1 ] )
-                }
-            } );
+            emitter.on( events.WSS_MESSAGE, this.onMessage.bind( this ) )
+            emitter.removeListener( events.WSS_MESSAGE, this.orderListener );
 
-            orderbook.sequence = orderbook[ "sequence" ];
-
-
-            gdaxApi.addListener( this.onMessage.bind( this ) );
-            gdaxApi.removeListener( this.orderListener );
-
-            var sequenceNumber = this.book.sequence;
             this.queue.forEach( order =>
             {
-                if ( order[ "sequence" ] > sequenceNumber )
+                if ( order[ "sequence" ] > orderbook[ "sequence" ] )
                 {
                     this.onMessage( order )
                 }
             } )
         } )
     }
-
 
     onMessage( order )
     {
@@ -133,7 +62,6 @@ class OrderBook {
 
             case "done":
 
-                this.updateCandleSticks( order );
                 this.deleteEntry( order );
 
                 break;
@@ -163,94 +91,61 @@ class OrderBook {
 
         var size = order[ "type" ] == "open" ? order[ "remaining_size" ] : order[ "size" ];
 
-        this.book[ bookType ][ orderId ] = {
-            price: parseFloat( order[ "price" ] ),
-            size: parseFloat( size ),
-            orderId: orderId,
-            side: order[ "side" ]
-        };
+        // price, size, id
+        this.book[ bookType ].push([ order.price, size, orderId ])
     }
 
     deleteEntry( order )
     {
-        delete this.book.bids[ order[ "order_id" ] ];
-        delete this.book.asks[ order[ "order_id" ] ];
+        // TODO can a match ever be deleted?  I think a match will result in a 'done' after
+        //var orderId = order[ "type" ] === "match" ? order[ "taker_order_id" ] : order[ "order_id" ];
+
+        var orderId = order[ "order_id" ];
+        var bookType = order.side == "buy" ? "bids" : 'asks';
+
+        for ( var i = 0; i < this.book[ bookType ].length; i++ )
+        {
+            if ( orderId === this.book[ bookType ][ i ][ 2 ] )
+            {
+                this.book[ bookType ].slice( i, 1 );
+                break;
+            }
+        }
     }
 
     updateEntry( order )
     {
         var orderId = order[ "order_id" ];
-        var bookType = order.side == "buy" ? "bids" : 'asks';
+        var bookType = order.side === "buy" ? "bids" : 'asks';
 
-        this.book[ bookType ][ orderId ].size = parseFloat( order[ "new_size" ] );
-    }
-
-    updateCandleSticks( order )
-    {
-        if ( order[ "reason" ] == "filled" )
+        for ( var i = 0; i < this.book[ bookType ].length; i++ )
         {
-            this.force.move();
-
-            var orderId = order[ "order_id" ];
-
-            // TODO need to do something with the remaining size.  Means there is some of the order left
-            // and could affect volume tracking
-            if ( this.getOrder( orderId ) == null )
+            if ( orderId === this.book[ bookType ][ i ][ 2 ] )
             {
-                // TODO wtf... why does this happen
-                // if I keep with my current strategy I think I would be better off just getting the orders fom the
-                //  rest api and building the candles with it
-                console.log( "MISSING ORDER" )
+                this.book[ bookType ][ i ] = [
+                    this.book[ bookType ][ i ][ 0 ],
+                    parseFloat( order[ "new_size" ] ),
+                    this.book[ bookType ][ i ][ 2 ]
+                ];
 
-
+                break;
             }
-            else
-            {
-                // TODO I think I am adding orders 2x.  should only add buy or sell side?
-                candleStickManager.add( this.getOrder( orderId ) );
-
-                // TODO need some listener or even class at some point
-                this.orderCompleteListeners.forEach( cb => cb(order) );
-            }
-
-
         }
     }
 
-}
-
-class Force {
-    constructor()
+    findOrderById( orderId )
     {
-        this.numTrades = 0;
-
-        this.velocity = 0;// num trades per period
-
-        this.startTime = Date.now();
-
-        this.intervalInSeconds = 1;
-
-        this.timerId = setInterval(this.calculate.bind(this), 1000 * this.intervalInSeconds)
-    }
-
-    calculate()
-    {
-        //var time = (Date.now() - this.startTime) * 0.0001;  // in seconds
-        this.velocity = this.numTrades / this.intervalInSeconds;
-
-        this.numTrades = 0;
-        this.startTime = Date.now();
-
-        //console.log('velocity: ' + this.velocity);
-    }
-    move()
-    {
-        this.numTrades++;
-    }
-
-    getVelocity()
-    {
-
+        [ "bids", "asks" ].forEach( bookType =>
+        {
+            for ( var i = 0; i < this.book[ bookType ].length; i++ )
+            {
+                if ( orderId === this.book[ bookType ][ i ][ 2 ] )
+                {
+                    return this.book[ bookType ][ i ];
+                }
+            }
+        } );
     }
 }
+
 module.exports = new OrderBook();

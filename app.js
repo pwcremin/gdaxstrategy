@@ -8,7 +8,10 @@ var bodyParser = require('body-parser');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
-var bot = require('./bot');
+///////////////////////////////////////////////////////
+var dailyPivot = require('./strategies/dailyPivot');
+///////////////////////////////////////////////////////
+
 
 var app = express();
 

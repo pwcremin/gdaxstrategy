@@ -5,6 +5,9 @@
 
 var _ = require( 'lodash' );
 
+var emitter = require( './emitter' ).emitter;
+var events = require( './emitter' ).events;
+
 class CandleStickManager {
     constructor( )
     {
@@ -18,24 +21,25 @@ class CandleStickManager {
         this.timerId = setInterval( this.complete.bind( this ), timeDeltaSeconds * 1000 );
 
         this.candlestickCallback = _.noop;
-    }
 
-    onCandlestick( cb )
-    {
-        this.candlestickCallback = cb;
+        emitter.on(events.ORDER_COMPLETE, this.add.bind(this))
     }
 
     add(trade)
     {
         this.trades.push(trade);
+
+        emitter.emit(events.CANDLESTICK_UPDATE);
+    }
+
+    getTrades()
+    {
+        // TODO return a copy instead?
+        return this.trades;
     }
 
     getRollingCandleStick()
     {
-        if(this.trades.length === 0)
-        {
-            console.log('what')
-        }
         // TODO need something better than this
         // should be impossible for this to happen
         //if(this.trades.length == 0) null;
@@ -44,6 +48,7 @@ class CandleStickManager {
         var close = _.last( this.trades ).price;
 
         return {
+            trade: _.last( this.trades ),
             open: open,
             close: close,
             getBodySize: () => Math.abs(open - close),
@@ -64,6 +69,8 @@ class CandleStickManager {
         {
             this.candleSticks = this.candleSticks.slice(1000); // TODO another made up number, but just chop off some sticks
         }
+
+        emitter.emit(events.CANDLESTICK_COMPLETE);
 
         //this.log();
     }

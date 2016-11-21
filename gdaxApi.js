@@ -5,6 +5,9 @@ var fetch = require( 'node-fetch' );
 var crypto = require( 'crypto' );
 require('dotenv').config();
 
+var emitter = require( './emitter' ).emitter;
+var events = require( './emitter' ).events;
+
 class GdaxApi {
 
     constructor()
@@ -20,26 +23,9 @@ class GdaxApi {
 
             this.ws.on( 'message', ( data ) =>
             {
-                this.listeners.forEach( ( listener ) => listener( JSON.parse( data ) ) )
+                emitter.emit(events.WSS_MESSAGE, JSON.parse( data ))
             } );
         } );
-    }
-
-    addListener( listener )
-    {
-        this.listeners.push( listener )
-    }
-
-    removeListener( listener )
-    {
-        for ( var i = 0; i < this.listeners.length; i++ )
-        {
-            if ( this.listeners[ i ] == listener )
-            {
-                delete this.listeners[ i ];
-                break;
-            }
-        }
     }
 
     subscribe()
