@@ -7,80 +7,125 @@
 
 "use strict";
 
-var { emitter, events } = require( './emitter' );
+var emitter = require( '../emitter' ).emitter;
+var events = require( '../emitter' ).events;
 
-var _ = require('lodash');
-var MA = require( 'moving-average' );
+var _ = require( 'lodash' );
 
 class MomentumStrategy {
     constructor()
     {
-
         var timeInterval = 5 * 60 * 1000;
+        var weight = 15;
 
         this.movingAverages = {
-            buy: MA( timeInterval ),
-            sell: MA( timeInterval )
+            buy: new MovingAverage( timeInterval, weight ),
+            sell: new MovingAverage( timeInterval, weight )
         };
 
-        this.velocities = {  // buys/sells per timeInterval
-            buy: 0,
-            sell: 0
-        };
-
-
-        emitter.on( events.ORDER_COMPLETE, this.onOrderComplete.bind( this ) );
-
+        this.onOrderCompleteCallback = this.onOrderComplete.bind( this );
     }
 
     run()
     {
+        emitter.on( events.ORDER_COMPLETE, this.onOrderCompleteCallback );
 
+        this.movingAverages.buy.start();
+        this.movingAverages.sell.start();
+    }
+
+    stop()
+    {
+        emitter.removeListener( events.ORDER_COMPLETE, this.onOrderCompleteCallback );
+
+        this.movingAverages.buy.stop();
+        this.movingAverages.sell.stop();
     }
 
     onOrderComplete( order )
     {
-        this.movingAverages[ order.side ].push( Date.now(), order.size );
+        this.movingAverages[ order.side ].push( order.size );
 
+        this.log()
     }
 
-    calculateMovingAverage()
+    log()
     {
+        var buyMA = this.movingAverages.buy.getAverage();
+        var sellMA = this.movingAverages.sell.getAverage();
 
+        var buyWeightedMA = this.movingAverages.buy.getWightedAverage();
+        var sellWeightedMA = this.movingAverages.sell.getWightedAverage();
+
+        console.log( "--- buy MA: " + buyMA + " WMA:" + buyWeightedMA );
+        console.log( "--- sell MA: " + sellMA + " WMA:" + sellWeightedMA );
     }
 }
 
-class MovingWindow {
-    constructor( sizeInSeconds )
+class MovingAverage {
+    constructor( sizeInMS, weight )
     {
-        this.size = sizeInSeconds;
+        this.sizeInMS = sizeInMS;
+        this.weight = weight;
+        this.window = [];
+    }
 
-        this.window = []
+    start()
+    {
+        this.timerId = setInterval( this.update.bind( this ), 500 );
+    }
 
-        this.timerId = setInterval(this.update.bind(this), 500);
+    stop()
+    {
+        clearInterval( this.timerId );
     }
 
     push( value )
     {
-        this.window.push( { time: Date.now, value: value } )
+        this.window.push( { time: Date.now(), value: value } )
     }
 
     getAverage()
     {
-        return _.sumBy(this.window, 'value').value / this.window.length;
+        if ( this.window.length == 0 ) return 0;
+
+        var avg = _.sumBy( this.window, 'value' ) / this.window.length;
+
+        return Number( Math.round( avg + 'e2' ) + 'e-2' ).toFixed( 2 );
+    }
+
+    getWightedAverage()
+    {
+        if(this.window.length == 0) return 0;
+
+        var lengthArray = _.range(1, this.window.length);
+        var triangularD = lengthArray.reduce((v, c, i) =>
+        {
+            return v + i
+        }, 1);
+
+        var avg = this.window.reduce( ( avg, data, index ) =>
+        {
+            var i = index + 1;
+            var r = avg + (data.value * (i / triangularD));
+            return r
+        }, 0 )
+
+        return Number( Math.round( avg + 'e2' ) + 'e-2' ).toFixed( 2 );
     }
 
     update()
     {
-        var startTime = Date.now() - (this.size * 1000);
+        var startTime = Date.now() - this.sizeInMS;
 
         for ( var i = 0; i < this.window.length; i++ )
         {
-
-            if(this.window[ i ].time < startTime)
+            if ( this.window[ i ].time < startTime )
             {
                 delete this.window[ i ];
             }
         }
     }
 }
+
+module.exports = new MomentumStrategy();

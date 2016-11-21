@@ -18,8 +18,20 @@ var events = require( './emitter' ).events;
 class DataLogger {
     constructor()
     {
-        emitter.on(events.CANDLESTICK_UPDATE, this.logCandlestickState.bind( this ))
-        emitter.on(events.CANDLESTICK_COMPLETE, this.onTradingPeriodEnd.bind( this ))
+        this.logCandlestickStateCallback= this.logCandlestickState.bind( this )
+        this.onTradingPeriodEndCallback = this.onTradingPeriodEnd.bind( this )
+    }
+
+    run()
+    {
+        emitter.on(events.CANDLESTICK_UPDATE, this.logCandlestickStateCallback)
+        emitter.on(events.CANDLESTICK_COMPLETE, this.onTradingPeriodEndCallback)
+    }
+
+    stop()
+    {
+        emitter.removeListener(events.CANDLESTICK_UPDATE, this.logCandlestickStateCallback)
+        emitter.removeListener(events.CANDLESTICK_COMPLETE, this.onTradingPeriodEndCallback)
     }
 
     onTradingPeriodEnd( candleStick )
@@ -46,6 +58,4 @@ class DataLogger {
     }
 }
 
-var dl = new DataLogger();
-
-module.exports = dl;
+module.exports = new DataLogger();

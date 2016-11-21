@@ -11,11 +11,7 @@ var _ = require( 'lodash' );
 
 var fetch = require( 'node-fetch' );
 
-var orderBook = require( './../orderBook' );
-
 var candlestickManager = require( './../candleStick' );
-
-var dataLogger = require('../datalogger');
 
 var emitter = require( '../emitter' ).emitter;
 var events = require( '../emitter' ).events;
@@ -116,9 +112,6 @@ class Strategy {
 }
 
 var strategy = new Strategy();
-
-strategy.run();
-
 
 class SmartOrder {
     constructor( price, size, side, movementSize )

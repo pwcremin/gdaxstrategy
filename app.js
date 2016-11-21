@@ -10,6 +10,11 @@ var users = require('./routes/users');
 
 ///////////////////////////////////////////////////////
 var dailyPivot = require('./strategies/dailyPivot');
+var momentum = require('./strategies/momentum');
+var dataLogger = require('./datalogger');
+
+momentum.run();
+dataLogger.run();
 ///////////////////////////////////////////////////////
 
 
