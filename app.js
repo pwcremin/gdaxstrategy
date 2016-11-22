@@ -9,12 +9,9 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 
 ///////////////////////////////////////////////////////
-var dailyPivot = require('./strategies/dailyPivot');
-var momentum = require('./strategies/momentum');
-var dataLogger = require('./datalogger');
+var strategyRunner = require('./strategies/strategyRunner');
 
-momentum.run();
-dataLogger.run();
+strategyRunner.run();
 ///////////////////////////////////////////////////////
 
 

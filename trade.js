@@ -6,7 +6,7 @@
 var orderBook = require( './orderBook' );
 var gdaxApi = require( './gdaxApi' );
 
-var balance = require('/balance');
+var balance = require('./balance');
 
 var emitter = require( './emitter' ).emitter;
 var events = require( './emitter' ).events;
@@ -17,21 +17,31 @@ class Trade {
     {
         this.openOrders = {};
 
-        this.letOrderLiveDuration = 1000 * 30;
-
         this.trackedOrders = {};
 
         emitter.on(events.ORDER_COMPLETE, this.onOrderComplete.bind( this ))
     }
 
-    buy( price, size, onOrderCompleteCallback )
+    // NOTE ON BUY SELL
+    // Users listening to streaming market data are encouraged to use the
+    // client_oid field to identify their received messages in the feed.
+    // The REST response with a server order_id may come after the received
+    // message in the public data feed.
+
+    // Decimal numbers are returned as strings to preserve full precision across platforms.
+    // When making a request, it is recommended that you also convert your numbers to strings
+    // to avoid truncation and precision errors.
+    // Integer numbers (like trade id and sequence) are unquoted.
+
+    // type: limit, market, or stop (default is limit)
+    buy( type, price, size, onOrderCompleteCallback )
     {
-        gdaxApi.buy( price, size, this.trackOrder.bind( this, onOrderCompleteCallback ) );
+        gdaxApi.buy( type, price, size, this.trackOrder.bind( this, onOrderCompleteCallback ) );
     }
 
-    sell( price, size, onOrderCompleteCallback )
+    sell( type, price, size, onOrderCompleteCallback )
     {
-        gdaxApi.sell( price, size, this.trackOrder.bind( this, onOrderCompleteCallback ) );
+        gdaxApi.sell( type, price, size, this.trackOrder.bind( this, onOrderCompleteCallback ) );
     }
 
     trackOrder( onOrderCompleteCallback, order )
@@ -40,7 +50,7 @@ class Trade {
         if ( !order.id )
         {
             console.log( "Trade: ERROR, order failed: " + JSON.stringify( order ) );
-            return;
+            return null;
         }
 
         this.trackedOrders[ order.id ] = onOrderCompleteCallback;
@@ -54,25 +64,11 @@ class Trade {
             side: order.side,
             id: order.id
         };
-
-        //setTimeout( this.cancelOrder.bind( this, order.id ), this.letOrderLiveDuration );
     }
 
     onOrderComplete( order )
     {
-        var didUpdate = this.updateActiveOrder(order);
-
-        if(didUpdate == false)
-        {
-            // TODO this logic should be in the strategy, not the trade
-            // if this wasnt my order then I want to cancel because the market is moving
-            // and my a buy/sell didnt happen
-
-            // not sure about this.. the next order could be matching mine?
-            // put in a delay
-            setTimeout(this.cancelOpenOrders.bind(this), 5000);
-            //this.cancelOpenOrders()
-        }
+        this.updateActiveOrder(order);
     }
 
     cancelOpenOrders()
@@ -86,7 +82,11 @@ class Trade {
 
     updateActiveOrder(order)
     {
-        var activeOrder = this.openOrders[ order[ "order_id" ] ];
+        if(order == null)
+        {
+            console.log('d')
+        }
+        var activeOrder = this.openOrders[ order.id ];
 
         if ( activeOrder )
         {

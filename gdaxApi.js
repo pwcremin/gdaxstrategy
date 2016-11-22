@@ -126,18 +126,23 @@ class GdaxApi {
         return this.privateFetch( requestPath, method, null, cb );
     }
 
-    buy( price, size, cb )
+    buy( type, price, size, cb )
     {
         var requestPath = "/orders";
 
         var method = "POST";
 
         var body = {
+            "type": type,
             "size": size.toString(),
-            "price": price.toString(),
             "side": "buy",
             "product_id": "BTC-USD"
         };
+
+        if(type !== 'market')
+        {
+            body['price'] = price.toString();
+        }
 
         return this.privateFetch( requestPath, method, body, (order) => {
             order.price = parseFloat(order.price);
@@ -149,18 +154,23 @@ class GdaxApi {
         } );
     }
 
-    sell( price, size, cb )
+    sell( type, price, size, cb )
     {
         var requestPath = "/orders";
 
         var method = "POST";
 
         var body = {
+            "type": type,
             "size": size.toString(),
-            "price": price.toString(),
             "side": "sell",
             "product_id": "BTC-USD"
         };
+
+        if(type !== 'market')
+        {
+            body['price'] = price.toString();
+        }
 
         return this.privateFetch( requestPath, method, body, (order) => {
             order.price = parseFloat(order.price);

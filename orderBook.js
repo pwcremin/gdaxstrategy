@@ -54,6 +54,8 @@ class OrderBook {
 
         switch ( order.type )
         {
+
+
             case "open":
 
                 this.addEntry( order );
@@ -61,20 +63,17 @@ class OrderBook {
                 break;
 
             case "done":
-
+                // Done messages for orders which are not on the book should be ignored when maintaining a real-time order book.
+                // This is already happening because the order wont be found in the books...
                 this.deleteEntry( order );
 
                 break;
 
             case "change":
 
-                this.updateEntry( order )
-
-                break;
-
-            case "match":
-
-                this.addEntry( order );
+                // Change messages for received but not yet open orders can be ignored when building a real-time order book
+                // This is already happening because the order wont be found in the books...
+                this.updateEntry( order );
 
                 break;
 
@@ -85,20 +84,19 @@ class OrderBook {
 
     addEntry( order )
     {
-        var orderId = order[ "type" ] === "match" ? order[ "taker_order_id" ] : order[ "order_id" ];
+        var orderId = order[ "order_id" ];
 
         var bookType = order.side == "buy" ? "bids" : 'asks';
 
         var size = order[ "type" ] == "open" ? order[ "remaining_size" ] : order[ "size" ];
 
         // price, size, id
-        this.book[ bookType ].push([ order.price, size, orderId ])
+        this.book[ bookType ].push( [ order.price, size, orderId ] )
     }
 
     deleteEntry( order )
     {
-        // TODO can a match ever be deleted?  I think a match will result in a 'done' after
-        //var orderId = order[ "type" ] === "match" ? order[ "taker_order_id" ] : order[ "order_id" ];
+        // TODO handle out of order sequences
 
         var orderId = order[ "order_id" ];
         var bookType = order.side == "buy" ? "bids" : 'asks';
@@ -141,10 +139,31 @@ class OrderBook {
             {
                 if ( orderId === this.book[ bookType ][ i ][ 2 ] )
                 {
-                    return this.book[ bookType ][ i ];
+                    return {
+                        "price": this.book[ bookType ][ i ][ 0 ],
+                        "size": this.book[ bookType ][ i ][ 1 ],
+                        "order_id": this.book[ bookType ][ i ][ 2 ],
+                        "side": bookType === "bids" ? "buy" : "sell"
+                    };
                 }
             }
         } );
+    }
+
+    log()
+    {
+        console.log('---------****** ORDER BOOK ******----------');
+
+        [ "bids", "asks" ].forEach( bookType =>
+        {
+            console.log('---- ' + bookType + ' -----')
+
+            for ( var i = 0; i < this.book[ bookType ].length; i++ )
+            {
+                console.log(JSON.stringify(this.book[ bookType ][ i ]))
+            }
+        } );
+        console.log('---------************************----------')
     }
 }
 

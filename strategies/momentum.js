@@ -17,12 +17,17 @@ var events = require( '../emitter' ).events;
 
 var _ = require( 'lodash' );
 var balance = require('../balance');
+var trade = require('../trade');
+
 
 class MomentumStrategy {
     constructor()
     {
         var timeIntervalInMS = 1 * 60 * 1000; //minutes
         var blockSizeInMS = 5 * 1000; //seconds
+
+        this.waitTimeBetweenTradeMS = 1 * 60 * 1000;
+        this.canTrade = true;
 
         this.blockMovingAverages = {
             buy: new BlockMovingAverage( timeIntervalInMS, blockSizeInMS ),
@@ -42,6 +47,9 @@ class MomentumStrategy {
 
     stop()
     {
+        // TODO dont cancel here, should be some master strategy runner that cancels all the order
+        //trade.cancelOpenOrders();
+
         emitter.removeListener( events.ORDER_COMPLETE, this.onOrderCompleteCallback );
 
         this.blockMovingAverages.buy.stop();
@@ -50,6 +58,8 @@ class MomentumStrategy {
 
     executeStrategy(order)
     {
+        if(this.canTrade == false) return;
+
         // look at the data and buy, sell, or do nothing
 
         var buyMA = this.blockMovingAverages.buy.getAverage();
@@ -58,36 +68,59 @@ class MomentumStrategy {
         var buyWeightedMA = this.blockMovingAverages.buy.getWightedAverage();
         var sellWeightedMA = this.blockMovingAverages.sell.getWightedAverage();
 
-        var executeWeight = 0.3;
+        var executeWeight = 0.4;
+        var tradeSize = 0.03;
 
         // TODO this isnt waiting until they slow down. Its just buying when everyone else goes nuts.  maybe ok
         if(buyWeightedMA >= executeWeight)
         {
-            console.log('***** Strategy: buy');
-
-            balance.purchase(order.price, 0.1);
-
-            balance.log();
+            this.makeBuy(order.price, tradeSize)
         }
 
         if(sellWeightedMA >= executeWeight)
         {
-            console.log('***** Strategy: sell');
-
-            balance.sell(order.price, 0.1);
-
-            balance.log();
+            this.makeSell(order.price, tradeSize)
         }
+    }
+
+    makeBuy(price, size)
+    {
+        console.log('***** Strategy: buy');
+
+        trade.buy('market', price, size, (cancelled, order) => {
+            balance.purchase(order.price, order.size);
+            balance.log();
+        });
+
+        this.pauseTrading();
+    }
+
+    makeSell(price, size)
+    {
+        console.log('***** Strategy: sell');
+
+        trade.sell('market', price, size, (cancelled, order) => {
+            balance.purchase(order.price, order.size);
+            balance.log();
+        });
+
+        this.pauseTrading();
+    }
+
+    pauseTrading()
+    {
+        this.canTrade = false;
+        setTimeout(() => this.canTrade = true, this.waitTimeBetweenTradeMS)
     }
 
     onOrderComplete( order )
     {
-        // tracking how many order over a time period using blocks
+        // tracking how many orders over a time period using blocks
         this.blockMovingAverages[order.side].push(1)
 
         // todo track the size as a movingaverage too, could be useful
 
-        this.executeStrategy( order );
+        //this.executeStrategy( order );
 
         this.log()
     }
