@@ -75,4 +75,4 @@ class Balance {
     }
 }
 
-module.export = new Balance();;
+module.exports = new Balance();

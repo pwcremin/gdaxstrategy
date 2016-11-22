@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8f1b6209-5643-4fb5-bc56-3c838aa7dbc9" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/datalogger.js" afterPath="$PROJECT_DIR$/datalogger.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/strategies/dailyPivot.js" afterPath="$PROJECT_DIR$/strategies/dailyPivot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/balance.js" afterPath="$PROJECT_DIR$/balance.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/strategies/momentum.js" afterPath="$PROJECT_DIR$/strategies/momentum.js" />
     </list>
     <ignored path="bitcoin.iws" />
@@ -86,8 +83,8 @@
       <file leaf-file-name="momentum.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strategies/momentum.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="157">
-              <caret line="23" column="10" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
+            <state relative-caret-position="238">
+              <caret line="62" column="106" selection-start-line="62" selection-start-column="106" selection-end-line="62" selection-end-column="106" />
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -151,7 +148,6 @@
         <option value="$PROJECT_DIR$/.env" />
         <option value="$PROJECT_DIR$/bot.js" />
         <option value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/lib/JavaScriptLanguage.jar!/com/intellij/javascript/nodejs/library/node-globals-stub.js" />
-        <option value="$PROJECT_DIR$/balance.js" />
         <option value="$APPLICATION_CONFIG_DIR$/javascript/nodejs/5.12.0/core-modules/events.js" />
         <option value="$PROJECT_DIR$/gdaxApi.js" />
         <option value="$PROJECT_DIR$/emitter.js" />
@@ -162,6 +158,7 @@
         <option value="$PROJECT_DIR$/datalogger.js" />
         <option value="$PROJECT_DIR$/app.js" />
         <option value="$PROJECT_DIR$/strategies/dailyPivot.js" />
+        <option value="$PROJECT_DIR$/balance.js" />
         <option value="$PROJECT_DIR$/strategies/momentum.js" />
       </list>
     </option>
@@ -334,16 +331,16 @@
       <updated>1479503647318</updated>
       <workItem from="1479503654060" duration="55616000" />
       <workItem from="1479672692517" duration="26604000" />
-      <workItem from="1479763287831" duration="3179000" />
+      <workItem from="1479763287831" duration="8089000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="85399000" />
+    <option name="totallyTimeSpent" value="90309000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="833" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14587738" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -355,7 +352,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32867134" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.7286713" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.42657343" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -405,7 +402,7 @@
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="193" />
+      <option name="time" value="198" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -604,6 +601,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="127">
           <caret line="78" column="1" selection-start-line="78" selection-start-column="1" selection-end-line="78" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -670,13 +668,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
           <caret line="6" column="9" selection-start-line="6" selection-start-column="9" selection-end-line="6" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/balance.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-102">
-          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -766,10 +757,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/balance.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="329">
+          <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/strategies/momentum.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="23" column="10" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
+        <state relative-caret-position="238">
+          <caret line="62" column="106" selection-start-line="62" selection-start-column="106" selection-end-line="62" selection-end-column="106" />
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
